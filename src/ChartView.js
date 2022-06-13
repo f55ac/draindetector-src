@@ -2,7 +2,7 @@ import React from 'react';
 
 import Graph from './Graph.js';
 import ChartToolbar from './ChartToolbar.js';
-import { firebaseGetDrainData } from './firebaseData.js';
+import { firebaseGetDataTimeRange } from './firebaseData.js';
 
 function HeaderView(props) {
     return (
@@ -24,7 +24,7 @@ class ChartView extends React.Component {
         this.onExportClick=this.onExportClick.bind(this);
         this.onStartChange=this.onStartChange.bind(this);
         this.onEndChange=this.onEndChange.bind(this);
-        this.setDataAsCallback=this.setDataAsCallback.bind(this);
+        this.callbackSetNameAndData=this.callbackSetNameAndData.bind(this);
 
         this.state = { 
             uuid: getSearchParam("uuid"),
@@ -56,8 +56,8 @@ class ChartView extends React.Component {
 
         const uuid = this.state.uuid;
 
-        firebaseGetDrainDataTimeRange(uuid, timeStart, timeEnd, 
-            this.setDataAsCallback);
+        firebaseGetDataTimeRange(uuid, timeStart, timeEnd, 
+            this.callbackSetNameAndData);
     }
     onExportClick() {
         triggerJsonDownload(this.state.name, this.state.exportData);

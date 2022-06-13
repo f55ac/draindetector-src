@@ -1,6 +1,15 @@
-# Getting Started with Create React App
+# draindetector-src
+
+Yet Another React App. This project was built on top of:
+- [https://github.com/mui/material-ui](https://github.com/mui/material-ui)
+- [https://github.com/recharts/recharts](https://github.com/recharts/recharts)
+- [https://github.com/firebase/firebase-js-sdk](https://github.com/firebase/firebase-js-sdk)
+- [https://github.com/remix-run/react-router](https://github.com/remix-run/react-router)
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## License
+Licensed under MIT in the spirit of the JS community.
 
 ## Available Scripts
 

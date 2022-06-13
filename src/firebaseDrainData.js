@@ -43,7 +43,7 @@ async function firebaseGetDataTimeRange(uuid, timeStart, timeEnd, callback) {
     callback(drainName, dataWithinTimeRange);
 }
 
-async function firebaseGetDataLatest(callback) {
+async function firebaseGetAllDataLatest(callback) {
     // { name: "drain#1", data: { epoch: ... ...} }, { name: "drain#2" ... }
     let rows = [];
 
@@ -53,13 +53,13 @@ async function firebaseGetDataLatest(callback) {
             limitToLast);
         latestDataPoint = Object.values(latestDataPoint)[0];
 
-        rows.push({ uuid: key, name: uuids[key], 
+        rows.push({ uuid: key, name: uuids[key], data: {
             time: new Date(latestDataPoint.epoch).toLocaleString(),
             cl: parseFloat(latestDataPoint.current_level),
             tl: parseFloat(latestDataPoint.flood_threshold)
-        });
+        }});
     }
     callback(rows);
 }
 
-export {firebaseGetDataTimeRange, firebaseGetDataLatest};
+export {firebaseGetDataTimeRange, firebaseGetAllDataLatest};

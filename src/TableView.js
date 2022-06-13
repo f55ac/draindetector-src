@@ -2,22 +2,22 @@ import React from 'react';
 import {Link} from "react-router-dom";
 
 import BasicTable from './Table';
-import { firebaseGetDrainRecent } from './firebaseData';
+import { firebaseGetAllDataLatest } from './firebaseDrainData';
 
 const columns = ["Unique ID", "Name of drain", "Last updated", "Current water level", "Flood threshold"];
 
 class TableView extends React.Component {
     constructor(props) {
         super(props);
-        this.setDataAsCallback = this.setDataAsCallback.bind(this);
+        this.callbackSetData = this.callbackSetData.bind(this);
 
         this.state = { columns: columns, data: null}
     }
     componentDidMount() {
-        firebaseGetDrainRecent(this.setDataAsCallback);
+        firebaseGetAllDataLatest(this.callbackSetData);
     }
 
-    setDataAsCallback(rows) {
+    callbackSetData(rows) {
         let processedRows= [];
         rows.forEach((row) => processedRows.push(this.createCellData(row)));
         this.setState({ data: processedRows });
