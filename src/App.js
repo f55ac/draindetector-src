@@ -1,26 +1,34 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import ResponsiveAppBar from './ResponsiveAppBar';
+import TableView from './TableView';
+import ChartView from './ChartView';
+//import LiveChartView from './LiveChartView';
+import AboutView from './AboutView';
+import NotificationRequestPrompt from './NotificationRequestPrompt';
+
+import './index.css';
+
+import { Route, Routes } from "react-router-dom";
+
+
+const pages = ["table", "about"];
+
+class App extends React.Component {
+    render() {
+        return (
+            <React.Fragment>
+            <NotificationRequestPrompt />
+            <ResponsiveAppBar pages={pages} />
+            <Routes>
+                <Route path='/' element={<TableView />}/>
+                <Route path='/table' element={<TableView />}/>
+                <Route path='/chart' element={<ChartView />}/>
+                <Route path='/about' element={<AboutView />}/>
+            </Routes>
+            </React.Fragment>
+        );
+    }
 }
 
 export default App;
