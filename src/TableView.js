@@ -4,7 +4,7 @@ import {Link} from "react-router-dom";
 import BasicTable from './Table';
 import { firebaseGetAllDataLatest } from './firebaseDrainData';
 
-const columns = ["Unique ID", "Name of drain", "Last updated", "Current water level", "Flood threshold"];
+const columns = ["Unique ID", "Name of drain", "Last updated", "Current water level", "Flood threshold", ""];
 
 class TableView extends React.Component {
     constructor(props) {
@@ -25,14 +25,19 @@ class TableView extends React.Component {
 
     createCellData(element) {
         // current water level cell needs to link to chart
-        let link = "/chart?uuid=" + element.uuid;
-        let cell = <Link to={link}>{element.data.cl}</Link>;
+        let live = "/live?uuid=" + element.uuid;
+        // separate link for detailed chart
+        let chart = "/chart?uuid=" + element.uuid;
+
+        let cl_link= <Link to={live}>{element.data.cl}</Link>;
+        let chart_link = <Link to={chart}>Detailed chart</Link>;
 
         return { uuid: element.uuid, 
                  name: element.name,
                  lastUpdated: element.data.time,
-                 cl: cell, 
-                 tl: element.data.tl 
+                 cl: cl_link,
+                 tl: element.data.tl,
+                 chart: chart_link
                };
     }
 

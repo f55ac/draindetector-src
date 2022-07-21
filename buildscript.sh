@@ -1,5 +1,5 @@
-mv build/.git .
+mv build/.git ./.nogit
 npm run build
-mv ./.git build
+mv ./.nogit build/.git
 cd build
-git push git@github.com:f55ac/draindetector.git master
+#git push git@github.com:f55ac/draindetector.git master

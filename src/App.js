@@ -4,6 +4,8 @@ import ResponsiveAppBar from './ResponsiveAppBar';
 import TableView from './TableView';
 import ChartView from './ChartView';
 import AboutView from './AboutView';
+import LiveChartView from './LiveChartView';
+import NotificationRequestPrompt from './NotificationRequestPrompt';
 
 import './index.css';
 
@@ -18,7 +20,7 @@ class App extends React.Component {
         this.onChangeViewType = this.onChangeViewType.bind(this);
         this.state = { viewType: "table" };
     }
-    
+
     onChangeViewType(newViewType) {
         console.log(this.state.viewType, newViewType);
         this.setState({ viewType: newViewType });
@@ -28,11 +30,13 @@ class App extends React.Component {
         return (
             <React.Fragment>
             <ResponsiveAppBar pages={pages} />
+            <NotificationRequestPrompt />
             <Routes>
                 <Route path='/' element={<TableView />}/>
                 <Route path='/table' element={<TableView />}/>
                 <Route path='/chart' element={<ChartView />}/>
                 <Route path='/about' element={<AboutView />}/>
+                <Route path='/live' element={<LiveChartView />}/>
             </Routes>
             </React.Fragment>
         );

@@ -35,6 +35,7 @@ export default function BasicTable(props) {
               <TableCell align="left">{row.lastUpdated}</TableCell>
               <TableCell align="left">{row.cl}</TableCell>
               <TableCell align="left">{row.tl}</TableCell>
+              <TableCell align="left">{row.chart}</TableCell>
             </TableRow>
           ))}
         </TableBody>
