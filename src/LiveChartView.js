@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Graph from './Graph.js';
-import { firebaseGetDataTimeRange } from './firebaseDrainData.js';
+import { firebaseGetDataTimeRange, firebaseGetPath } from './firebaseDrainData.js';
 
 function HeaderView(props) {
     return (
@@ -10,6 +10,7 @@ function HeaderView(props) {
             <p>
                 Last {props.duration}
             </p>
+            <button onClick={props.handleChartToggle}>Pause/Play</button>
         </div>
     );
 }
@@ -19,38 +20,53 @@ class LiveChartView extends React.Component {
         super(props);
         this.updateData=this.updateData.bind(this);
         this.callbackSetNameAndData=this.callbackSetNameAndData.bind(this);
+        this.onChartToggle=this.onChartToggle.bind(this);
 
         this.state = { 
             uuid: getSearchParam("uuid"),
-            name: null, data: null, exportData: null,
+            name: null, data: [], exportData: null,
             timeStart: new Date(Date.now() - 30*1000),
             timeEnd: new Date()
         };
     }
 
     componentDidMount() {
-        // hack to render graph on load
-        //this.onApplyClick();
-        this.timerID = setInterval(() => this.updateData());
+        this.timerID = setInterval(() => this.updateData(), 1000);
+    }
+
+    componentWillUnmount() {
+        if (this.timerID) 
+            clearInterval(this.timerID);
     }
 
     updateData() {
-        firebaseGetDataTimeRange(
-            this.state.uuid,
-            this.state.timeStart,
-            this.state.timeEnd,
+        firebaseGetPath(
+            "/Realtime/0064B017",
             this.callbackSetNameAndData
         );
     }
 
     callbackSetNameAndData(drainName, rawData) {
-        let formatted = [];
-        for (let element of rawData) {
-            formatted.push({ time: new Date(element.epoch).toLocaleString(),
-                        cl: parseFloat(element.current_level),
-                        tl: parseFloat(element.flood_threshold) });
+        let base = this.state.data.map(elem=>elem);
+        if (base.length > 30)
+            base = base.slice(base.length-29, base.length);
+        
+        console.log("test");
+        base.push(rawData);
+        this.setState({ name: drainName, data: base, exportData: rawData});
+    }
+
+    onChartToggle() {
+        if (this.timerID) {
+            clearInterval(this.timerID);
+            this.timerID = null;
         }
-        this.setState({ name: drainName, data: formatted, exportData: rawData});
+        else {
+            this.timerID = setInterval(
+                () => this.updateData(),
+                1000
+            );
+        }
     }
 
     render() {
@@ -59,14 +75,14 @@ class LiveChartView extends React.Component {
                 <HeaderView
                     text={"Live water level graph for " + this.state.name}
                     duration={"30 seconds"}
+                    handleChartToggle={this.onChartToggle}
                 />
                 <Graph
                     data={this.state.data}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                    lines={[ { name: "Current water level", dataKey: "cl",
-                              strokeWidth:3, stroke:"#8884d8", unit: "m"},
-                             { name: "Flood threshold", dataKey: "tl",
-                              strokeWidth:3, stroke:"#82ca9d", unit: "m"}
+                    xaxis="Timestamp"
+                    lines={[ { name: "Current water level", dataKey: "Distance",
+                              strokeWidth:3, stroke:"#8884d8", unit: "m"}
                            ]}
                 />
             </div>

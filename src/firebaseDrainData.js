@@ -3,11 +3,11 @@ import { getDatabase, ref, get, query, limitToFirst, limitToLast } from "firebas
 
 //firebase stuff
 const firebaseConfig = {
-  apiKey: "AIzaSyBuOyvPrVKJ3-UiMCD3TvQ9MrJcjodwl44",
-  authDomain: "jtan-messaging.firebaseapp.com",
-  databaseURL: "https://jtan-messaging-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "jtan-messaging",
-  storageBucket: "jtan-messaging.appspot.com",
+  apiKey: "AIzaSyCkrrH0grVByOer9uFNihCLESnGVMM0guw",
+  authDomain: "iot-draintector.firebaseapp.com",
+  databaseURL: "https://iot-draintector-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "iot-draintector",
+  storageBucket: "iot-draintector.appspot.com",
   messagingSenderId: "212453034132",
   appId: "1:212453034132:web:5d9a5537ac797b917ccc81"
 };
@@ -23,11 +23,16 @@ async function firebaseQueryWithConstraint(path, noOfUpdates, queryConstraint) {
     return get(newQuery).then((snapshot)=>snapshot.val());
 }
 
+async function firebaseQuery(path) {
+    let newQuery = ref(database, path);
+    return get(newQuery).then((snapshot)=>snapshot.val());
+}
+
 async function firebaseGetDataTimeRange(uuid, timeStart, timeEnd, callback) {
     const dataUpdates = await firebaseQueryFull(`/updates/${uuid}`, null);
     const reversedUpdates = Object.values(dataUpdates).reverse();
+    let noOfUpdates = 0; 
     let offset = 0; // to slice array later
-    let noOfUpdates= 0;  
     for (let epoch of reversedUpdates) {
         if (epoch < timeStart) break;
 
@@ -35,12 +40,11 @@ async function firebaseGetDataTimeRange(uuid, timeStart, timeEnd, callback) {
         noOfUpdates+= 1;
     }
 
-    const drainName = await firebaseQueryFull(`/uuids/${uuid}`, null);
-    const drainData  = await firebaseQueryWithConstraint(`/data/${uuid}`, 
-        noOfUpdates, limitToLast);
-    const dataWithinTimeRange = Object.values(drainData).slice(0, noOfUpdates-offset);
+    const drainData  = await firebaseQuery(`/Realtime/0064B017`);
+    const drainName = await firebaseQueryFull(`/uuids/${uuid}`);
+    const dataWithinTimeRange = Object.values(drainData).slice(0);
 
-    callback(drainName, dataWithinTimeRange);
+    callback(drainName, drainData);
 }
 
 async function firebaseGetAllDataLatest(callback) {
@@ -62,4 +66,12 @@ async function firebaseGetAllDataLatest(callback) {
     callback(rows);
 }
 
-export {firebaseGetDataTimeRange, firebaseGetAllDataLatest};
+async function firebaseGetPath(path, callback) {
+    let newQuery = ref(database, path);
+    let data = get(newQuery).then((snapshot)=>snapshot.val());
+    data.Timestamp = new Date(data.Timestamp).toLocaleTimeString();
+
+    return data;
+}
+
+export {firebaseGetDataTimeRange, firebaseGetAllDataLatest, firebaseGetPath};

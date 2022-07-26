@@ -21,7 +21,7 @@ class Graph extends React.Component {
             data={this.props.data}
             margin={this.props.margin}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="time" />
+            <XAxis dataKey={this.props.xaxis} />
             <YAxis unit="m" />
             <Tooltip />
             <Legend />
@@ -33,6 +33,7 @@ class Graph extends React.Component {
                              strokeWidth={line.strokeWidth}
                              stroke={line.stroke}
                              unit={line.unit} 
+                             isAnimationActive={false}
                         />
              })}
           </LineChart>
