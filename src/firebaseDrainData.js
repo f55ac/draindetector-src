@@ -23,13 +23,8 @@ async function firebaseQueryWithConstraint(path, noOfUpdates, queryConstraint) {
     return get(newQuery).then((snapshot)=>snapshot.val());
 }
 
-async function firebaseQuery(path) {
-    let newQuery = ref(database, path);
-    return get(newQuery).then((snapshot)=>snapshot.val());
-}
-
 async function firebaseGetDataTimeRange(uuid, timeStart, timeEnd, callback) {
-    const dataUpdates = await firebaseQueryFull(`/updates/${uuid}`, null);
+    const dataUpdates = await firebaseQueryFull(`/updates/${uuid}`);
     const reversedUpdates = Object.values(dataUpdates).reverse();
     let noOfUpdates = 0; 
     let offset = 0; // to slice array later
@@ -40,38 +35,48 @@ async function firebaseGetDataTimeRange(uuid, timeStart, timeEnd, callback) {
         noOfUpdates+= 1;
     }
 
-    const drainData  = await firebaseQuery(`/Realtime/0064B017`);
     const drainName = await firebaseQueryFull(`/uuids/${uuid}`);
-    const dataWithinTimeRange = Object.values(drainData).slice(0);
+    const drainData  = await firebaseQueryWithConstraint(
+        `/History/${uuid}`,
+        noOfUpdates,
+        limitToLast
+    );
+    let dataWithinTimeRange = [];
+    for (let key in drainData) {
+        const sensor = drainData[key];
+        const withinTimeRange = Object.values(sensor).slice(0, noOfUpdates-offset);
 
-    callback(drainName, drainData);
+        let object = {}; object[key] = withinTimeRange;
+        dataWithinTimeRange.push(object);
+    }
+
+    callback(drainName, dataWithinTimeRange);
 }
 
 async function firebaseGetAllDataLatest(callback) {
-    // { name: "drain#1", data: { epoch: ... ...} }, { name: "drain#2" ... }
     let rows = [];
 
     const uuids = await firebaseQueryFull('/uuids/');
     for (let key in uuids) {
-        let latestDataPoint = await firebaseQueryWithConstraint(`/data/${key}`, 1, 
-            limitToLast);
-        latestDataPoint = Object.values(latestDataPoint)[0];
+        console.log(key);
+        const latestDataPoint = await firebaseQueryFull(`/Realtime/${key}`);
+        //latestDataPoint = Object.values(latestDataPoint)[0];
 
         rows.push({ uuid: key, name: uuids[key], data: {
-            time: new Date(latestDataPoint.epoch).toLocaleString(),
-            cl: parseFloat(latestDataPoint.current_level),
-            tl: parseFloat(latestDataPoint.flood_threshold)
+            time: new Date(latestDataPoint.Timestamp).toLocaleString(),
+            cl: parseFloat(latestDataPoint.Distance),
         }});
     }
     callback(rows);
 }
 
-async function firebaseGetPath(path, callback) {
-    let newQuery = ref(database, path);
-    let data = get(newQuery).then((snapshot)=>snapshot.val());
-    data.Timestamp = new Date(data.Timestamp).toLocaleTimeString();
+async function firebaseGetDataRealtime(uuid, callback) {
+    const drainName = await firebaseQueryFull(`/uuids/${uuid}`);
+    const realtimeData = await firebaseQueryFull(`/Realtime/${uuid}`);
 
-    return data;
+    //data.Timestamp = new Date(data.Timestamp).toLocaleTimeString();
+
+    callback(drainName, realtimeData);
 }
 
-export {firebaseGetDataTimeRange, firebaseGetAllDataLatest, firebaseGetPath};
+export {firebaseGetDataTimeRange, firebaseGetAllDataLatest, firebaseGetDataRealtime};

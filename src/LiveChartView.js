@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Graph from './Graph.js';
-import { firebaseGetDataTimeRange, firebaseGetPath } from './firebaseDrainData.js';
+import { firebaseGetDataRealtime } from './firebaseDrainData.js';
 
 function HeaderView(props) {
     return (
@@ -24,7 +24,7 @@ class LiveChartView extends React.Component {
 
         this.state = { 
             uuid: getSearchParam("uuid"),
-            name: null, data: [], exportData: null,
+            name: null, data: null, exportData: null,
             timeStart: new Date(Date.now() - 30*1000),
             timeEnd: new Date()
         };
@@ -40,19 +40,18 @@ class LiveChartView extends React.Component {
     }
 
     updateData() {
-        firebaseGetPath(
-            "/Realtime/0064B017",
-            this.callbackSetNameAndData
-        );
+        firebaseGetDataRealtime( this.state.uuid, this.callbackSetNameAndData );
     }
 
     callbackSetNameAndData(drainName, rawData) {
-        let base = this.state.data.map(elem=>elem);
+        let base = (this.state.data ? this.state.data.map(elem=>elem) : new Array());
         if (base.length > 30)
             base = base.slice(base.length-29, base.length);
         
-        console.log("test");
-        base.push(rawData);
+        base.push({
+            Distance: rawData.Distance,
+            Timestamp: new Date(rawData.Timestamp).toLocaleTimeString()
+        });
         this.setState({ name: drainName, data: base, exportData: rawData});
     }
 
@@ -82,7 +81,8 @@ class LiveChartView extends React.Component {
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                     xaxis="Timestamp"
                     lines={[ { name: "Current water level", dataKey: "Distance",
-                              strokeWidth:3, stroke:"#8884d8", unit: "m"}
+                              strokeWidth:3, stroke:"#8884d8", unit: "cm",
+                              isAnimationActive:false }
                            ]}
                 />
             </div>

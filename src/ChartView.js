@@ -28,7 +28,8 @@ class ChartView extends React.Component {
 
         this.state = { 
             uuid: getSearchParam("uuid"),
-            name: null, data: null, exportData: null,
+            name: null, lines:null, 
+            data: null, exportData: null,
             timeStart: new Date(Date.now() - 3600000),
             timeEnd: new Date()
         };
@@ -40,13 +41,28 @@ class ChartView extends React.Component {
     }
 
     callbackSetNameAndData(drainName, rawData) {
-        let formatted = [];
-        for (let element of rawData) {
-            formatted.push({ time: new Date(element.epoch).toLocaleString(),
-                        cl: parseFloat(element.current_level),
-                        tl: parseFloat(element.flood_threshold) });
+        let lines = [], formattedLines = [];
+        for (let key in rawData) {
+            const sensor = rawData[key];
+            lines.push({
+                name: `${key}: water level`, dataKey: key,
+                strokeWidth: 3, stroke: "#000000", unit: "cm"
+            });
+
+            for (let element of sensor) {
+                let lineData = {};
+                //let lineData = {};
+                lineData.time = new Date(element.Timestamp).toLocaleString();
+                // e.g. lineData["sensor1"]
+                lineData[key] = parseFloat(element.Distance);
+
+                formattedLines.push(lineData);
+            }
         }
-        this.setState({ name: drainName, data: formatted, exportData: rawData});
+        this.setState({ 
+            name: drainName, data: formattedLines, 
+            lines: lines, exportData: rawData
+        });
     }
 
     onApplyClick() {
@@ -80,11 +96,8 @@ class ChartView extends React.Component {
                 <Graph
                     data={this.state.data}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                    lines={[ { name: "Current water level", dataKey: "cl",
-                              strokeWidth:3, stroke:"#8884d8", unit: "m"},
-                             { name: "Flood threshold", dataKey: "tl",
-                              strokeWidth:3, stroke:"#82ca9d", unit: "m"}
-                           ]}
+                    xaxis="time"
+                    lines={this.state.lines}
                 />
                     
                 <ChartToolbar
